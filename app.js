@@ -343,6 +343,21 @@ app.post('/editproduct/:id',(req,res)=>{
     })
 });
 
+app.get('/search', (req, res) => {
+    const productName = req.query.productName
+
+    const sql = 'SELECT * FROM products WHERE product_name LIKE ?';
+
+    db.query(sql, [productName], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error.message);
+            return res.status(500).send('Error searching products');
+        }
+        res.render('index', { products: results });
+    });
+});
+
+
 
 app.listen(3000, () => {
     console.log('Server started on port 3000');
