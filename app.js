@@ -136,7 +136,7 @@ app.post('/addproduct', (req, res)=>{
 })
 
 //******** TODO: Insert code for login routes to render login page below ********//
-app.get('/',(req,res)=>{
+app.get('/login',(req,res)=>{
     res.render('login',{
         messages: req.flash('success'),
         errors: req.flash('error')
@@ -372,7 +372,7 @@ app.get('/searchuser', (req, res) => {
 });
 
 
-app.get('/summary', (req, res) => {
+app.get('/summary',checkAuthenticated, checkAdmin, (req, res) => {
     const summary = {};
 
     const totalQuery = "SELECT COUNT(*) AS total FROM products";
@@ -395,7 +395,13 @@ app.get('/summary', (req, res) => {
                     ? Number(avgResult[0].avg_price).toFixed(2)
                     : "0.00";
 
-                res.render('summary', { summary });
+                res.render('summary', { 
+                summary,
+                user: req.session.user,
+                page:'summary',
+                messages: req.flash('error'),
+                success: req.flash('success')
+             });
             });
         });
     });
