@@ -66,6 +66,10 @@ const checkAdmin =(req, res, next) =>{
 
 
 // Routes
+app.get('/', (req, res) => {
+    res.redirect('/login'); // or render a landing page directly, e.g. res.render('home');
+});
+
 app.get('/index',(req,res)=>{
     const sql ="SELECT * FROM products";
     db.query(sql,(error,results)=>{
@@ -364,57 +368,6 @@ app.get('/search', (req, res) => {
     });
 });
 
-
-app.get('/searchuser', (req, res) => {
-    const username = req.query.username;
-
-    const sql = 'SELECT * FROM users WHERE username LIKE ?';
-
-    db.query(sql, [username], (error, results) => {
-        if (error) {
-            console.error('Database query error:', error.message);
-            return res.status(500).send('Error searching products');
-        }
-        res.render('dashboard', { users: results });
-    });
-});
-
-
-app.get('/summary',checkAuthenticated, checkAdmin, (req, res) => {
-    const summary = {};
-
-    const totalQuery = "SELECT COUNT(*) AS total FROM products";
-    db.query(totalQuery, (err, totalResult) => {
-        if (err) return res.status(500).send("Total error");
-
-        summary.total = totalResult[0].total;
-
-        const catQuery = "SELECT product_category, COUNT(*) AS count FROM products GROUP BY product_category";
-        db.query(catQuery, (err, catResults) => {
-            if (err) return res.status(500).send("Category error");
-
-            summary.categories = catResults;
-
-            const avgQuery = "SELECT AVG(price) AS avg_price FROM products";
-            db.query(avgQuery, (err, avgResult) => {
-                if (err) return res.status(500).send("Avg error");
-
-                summary.avg_price = (avgResult[0].avg_price !== null)
-                    ? Number(avgResult[0].avg_price).toFixed(2)
-                    : "0.00";
-
-                res.render('summary', { 
-                summary,
-                user: req.session.user,
-                page:'summary',
-                messages: req.flash('error'),
-                success: req.flash('success')
-             });
-            });
-        });
-    });
-});
-
 app.get('/searchproductform', (req, res) => {
     res.render('searchproductform'); 
 });
@@ -454,6 +407,21 @@ app.get('/searchproductfilter', (req, res) => {
     });
 });
 
+
+app.get('/searchuser', (req, res) => {
+    const username = req.query.username;
+
+    const sql = 'SELECT * FROM users WHERE username LIKE ? OR email LIKE ? OR address LIKE ? OR contact LIKE ? OR role LIKE ?';
+    const searchValue = `%${username}%`
+
+    db.query(sql, [searchValue, searchValue, searchValue, searchValue, searchValue], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error.message);
+            return res.status(500).send('Error searching products');
+        }
+        res.render('dashboard', { users: results });
+    });
+});
 app.get('/searchuserform', (req, res) => {
     res.render('searchuserform'); 
 });
@@ -498,6 +466,41 @@ app.get('/searchuserfilter', (req, res) => {
     });
 });
 
+
+app.get('/summary',checkAuthenticated, checkAdmin, (req, res) => {
+    const summary = {};
+
+    const totalQuery = "SELECT COUNT(*) AS total FROM products";
+    db.query(totalQuery, (err, totalResult) => {
+        if (err) return res.status(500).send("Total error");
+
+        summary.total = totalResult[0].total;
+
+        const catQuery = "SELECT product_category, COUNT(*) AS count FROM products GROUP BY product_category";
+        db.query(catQuery, (err, catResults) => {
+            if (err) return res.status(500).send("Category error");
+
+            summary.categories = catResults;
+
+            const avgQuery = "SELECT AVG(price) AS avg_price FROM products";
+            db.query(avgQuery, (err, avgResult) => {
+                if (err) return res.status(500).send("Avg error");
+
+                summary.avg_price = (avgResult[0].avg_price !== null)
+                    ? Number(avgResult[0].avg_price).toFixed(2)
+                    : "0.00";
+
+                res.render('summary', { 
+                summary,
+                user: req.session.user,
+                page:'summary',
+                messages: req.flash('error'),
+                success: req.flash('success')
+             });
+            });
+        });
+    });
+});
 
 app.listen(3000, () => {
     console.log('Server started on port 3000');
