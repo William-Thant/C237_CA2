@@ -2,13 +2,35 @@ const express = require('express');
 const mysql = require('mysql2');
 
 //******** TODO: Insert code to import 'express-session' *********//
-
+const multer = require('multer')
 
 const flash = require('connect-flash');
 
 const app = express();
 
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
+const bodyParser = require('body-parser');
+
+// Middleware
+app.use(cookieParser());
+
+app.use(session({
+    secret: 'your_secure_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }
+}));
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use((req, res, next) => {
+    if (req.cookies.rememberMe) {
+        const [email, password] = Buffer.from(req.cookies.rememberMe, 'base64').toString().split(':');
+        req.remembered = { email, password };
+    }
+    next();
+});
 
 // Database connection
 const db = mysql.createConnection({
@@ -29,6 +51,16 @@ db.connect((err) => {
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
+const storage =multer.diskStorage({
+    destination: (req, file, cb) =>{
+        cb(null, 'public/images');
+    },
+    filename:(req, file, cb) =>{
+        cb(null, file.originalname)
+    }
+})
+
+const upload = multer({storage: storage});
 //******** TODO: Insert code for Session Middleware below ********//
 app.use(session({
     secret:'secret', //session id to be hashed with this secret to prevent changes of session id
@@ -66,9 +98,6 @@ const checkAdmin =(req, res, next) =>{
 
 
 // Routes
-app.get('/', (req, res) => {
-    res.redirect('/login'); // or render a landing page directly, e.g. res.render('home');
-});
 
 app.get('/index',(req,res)=>{
     const sql ="SELECT * FROM products";
@@ -137,52 +166,71 @@ app.post('/addproduct', (req, res)=>{
             res.redirect('/index');
         }
     })
-})
+});
 
-//******** TODO: Insert code for login routes to render login page below ********//
-app.get('/login',(req,res)=>{
-    res.render('login',{
-        messages: req.flash('success'),
-        errors: req.flash('error')
-    })
-})
-
-//******** TODO: Insert code for login routes for form submission below ********//
-app.post('/login',(req,res) =>{
-    const {email,password}=req.body;
-
-    //validate email and password
-    if (!email || !password){
-        req.flash('error', 'All fields are required');
-        return res.redirect('/index')
+app.get('/', (req, res) => {
+    let remembered = null;
+    if (req.cookies.rememberMe) {
+        try {
+            const decoded = Buffer.from(req.cookies.rememberMe, 'base64').toString();
+            const [email, password] = decoded.split(':');
+            remembered = { email, password };
+        } catch (e) {
+            console.error("Invalid cookie format");
+        }
     }
 
-    const sql ='SELECT * FROM users WHERE email =? AND password = SHA1(?)';
-    db.query(sql,[email,password],(err,result)=>{
-        if(err) {
-            throw err;
+    res.render('login', {
+        errors: req.flash('error'),
+        messages: req.flash('success'),
+        remembered
+    });
+});
+
+//******** TODO: Insert code for login routes to render login page below ********//
+app.post('/login', (req, res) => {
+    const { email, password, rememberMe } = req.body;
+
+    if (!email || !password) {
+        req.flash('error', 'All fields are required');
+        return res.redirect('/');
+    }
+
+    const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA1(?)';
+    db.query(sql, [email, password], (err, result) => {
+        if (err) {
+            console.error("DB error:", err);
+            req.flash('error', 'An error occurred. Try again.');
+            return res.redirect('/');
         }
 
         if (result.length > 0) {
-            //successful login
             req.session.user = result[0];
-            req.flash('success','Login successful!');
+
+            // Set "remember me" cookie
+            if (rememberMe) {
+                const value = Buffer.from(`${email}:${password}`).toString('base64');
+                res.cookie('rememberMe', value, {
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
+                    httpOnly: true,
+                    secure: false
+                });
+            } else {
+                res.clearCookie('rememberMe');
+            }
+
             if (result[0].role === 'admin') {
-                res.redirect('/dashboard')
-            }
-            else if (result[0].role === 'user') {
-                res.redirect('/index')
+                return res.redirect('/dashboard');
+            } else {
+                return res.redirect('/index');
             }
 
-        }
-        else{
-            //invalid credentials
-            req.flash('error','Invalid  email or password.');
+        } else {
+            req.flash('error', 'Invalid email or password.');
             res.redirect('/');
-
         }
-    })
-})
+    });
+});
 //******** TODO: Insert code for dashboard route to render dashboard page for users. ********//
 app.get('/dashboard', checkAuthenticated, checkAdmin,(req, res) => {
     const sql = 'SELECT * FROM users';
@@ -500,6 +548,11 @@ app.get('/summary',checkAuthenticated, checkAdmin, (req, res) => {
             });
         });
     });
+});
+app.get('/forget', (req, res) => {
+    res.clearCookie('rememberMe');
+    req.flash('success', 'Login info forgotten.');
+    res.redirect('/');
 });
 
 app.listen(3000, () => {
