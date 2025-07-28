@@ -357,6 +357,21 @@ app.get('/search', (req, res) => {
     });
 });
 
+app.get('/searchuser', (req, res) => {
+    const username = req.query.username;
+
+    const sql = 'SELECT * FROM users WHERE username LIKE ?';
+
+    db.query(sql, [username], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error.message);
+            return res.status(500).send('Error searching products');
+        }
+        res.render('dashboard', { users: results });
+    });
+});
+
+
 
 
 app.listen(3000, () => {
