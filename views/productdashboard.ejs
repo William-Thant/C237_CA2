@@ -45,7 +45,10 @@
             <td><%= new Date(products[i].dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
             <td>$<%= products[i].price.toFixed(2) %></td>
             <td><%= products[i].size %></td>
-            
+            <!--Edit Link-->
+            <td><a href="/editproduct/<%= products[i].productID %>">Edit</a></td>
+            <!--Delete Link-->
+            <td><a href="/deleteproduct/<%= products[i].productID %>" onclick= "return confirm('Are you sure you want to delete this product?')">Delete</a></td>
             <br><br>
           </tr>
         <% } %>
@@ -53,6 +56,7 @@
     </table>
     
     <a class="btn btn-primary" href="/">Log out</a>
+    <a class="btn btn-primary" href="/dashboard">User Dashboard</a>
   </div>
 </body>
 </html>
