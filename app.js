@@ -344,11 +344,18 @@ app.post('/editproduct/:id',(req,res)=>{
 });
 
 app.get('/search', (req, res) => {
-    const productName = req.query.productName
+    const productName = req.query.productName;
 
-    const sql = 'SELECT * FROM products WHERE product_name LIKE ?';
+    const sql = `
+        SELECT * FROM products 
+        WHERE product_name LIKE ? 
+        OR product_date LIKE ? 
+        OR size LIKE ?
+    `;
 
-    db.query(sql, [productName], (error, results) => {
+    const searchValue = `%${productName}%`;
+
+    db.query(sql, [searchValue, searchValue, searchValue], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
             return res.status(500).send('Error searching products');
@@ -356,6 +363,7 @@ app.get('/search', (req, res) => {
         res.render('index', { products: results });
     });
 });
+
 
 app.get('/searchuser', (req, res) => {
     const username = req.query.username;
@@ -405,7 +413,7 @@ app.get('/searchproductform', (req, res) => {
     res.render('searchproductform'); 
 });
 
-app.get('/searchproduct', (req, res) => {
+app.get('/searchproductfilter', (req, res) => {
     const { product_name, product_date, price, size } = req.query;
 
     let sql = "SELECT * FROM products WHERE 1=1";  // '1=1' allows appending AND conditions safely
@@ -437,6 +445,50 @@ app.get('/searchproduct', (req, res) => {
             return res.status(500).send("Internal server error");
         }
         res.render("index", { products: results }); // pass data to search.ejs
+    });
+});
+
+app.get('/searchuserform', (req, res) => {
+    res.render('searchuserform'); 
+});
+
+app.get('/searchuserfilter', (req, res) => {
+    const { username, email, address, contact, role } = req.query;
+
+    let sql = "SELECT * FROM users WHERE 1=1";  // '1=1' allows appending AND conditions safely
+    const params = [];
+
+    if (username) {
+        sql += " AND username LIKE ?";
+        params.push(`%${username}%`);
+    }
+
+    if (email) {
+        sql += " AND email = ?";
+        params.push(email);
+    }
+
+    if (address) {
+        sql += " AND address LIKE ?";
+        params.push(`%${address}%`);
+    }
+
+    if (contact) {
+        sql += " AND contact = ?";
+        params.push(contact);
+    }
+
+    if(role){
+        sql += " AND role = ?";
+        params.push(role);
+    }
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).send("Internal server error");
+        }
+        res.render("dashboard", { users: results }); // pass data to search.ejs
     });
 });
 

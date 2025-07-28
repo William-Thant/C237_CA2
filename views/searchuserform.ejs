@@ -90,28 +90,33 @@
         <div class="text-center"><h2>Search For Toy</h2></div>
         <br>
         <div class="text-center">
-            <form action="/searchproductfilter" method="GET" class="mt-4">
-                <label for="product_name">Toy Name:</label><br>
-                <input type="text" id="product_name" name="product_name"><br><br>
-
-                <label for="product_date">Manufacture Date:</label><br>
-                <input type="date" id="product_date" name="product_date"><br><br>
-
-
-                <label for="price">price:</label><br>
-                <input type="number" id="price" name="price" min="0" step="0.01"><br><br>
-
-                <label for="size">Size</label>
-                <select id="size" name="size">
+            <form action="/searchuserfilter" method="GET" class="mt-4">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="contact">Contact Number:</label>
+                <input type="text" id="contact" name="contact" class="form-control">
+            </div>
+            <div>
+                <label for="role">Role</label>
+                <select id="role" name="role">
                     <option value="">-- No matter --</option>
-                    <option value="large">Large</option>
-                    <option value="medium">Medium</option>
-                    <option value="small">Small</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
                 </select>
                 <br><br>
-
-                <button type="submit">Search Product</button>
-
-            </form>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </div>
