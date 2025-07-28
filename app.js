@@ -401,6 +401,46 @@ app.get('/summary', (req, res) => {
     });
 });
 
+app.get('/searchproductform', (req, res) => {
+    res.render('searchproductform'); 
+});
+
+app.get('/searchproduct', (req, res) => {
+    const { product_name, product_date, price, size } = req.query;
+
+    let sql = "SELECT * FROM products WHERE 1=1";  // '1=1' allows appending AND conditions safely
+    const params = [];
+
+    if (product_name) {
+        sql += " AND product_name LIKE ?";
+        params.push(`%${product_name}%`);
+    }
+
+    if (product_date) {
+        sql += " AND product_date = ?";
+        params.push(product_date);
+    }
+
+    if (price) {
+        sql += " AND price = ?";
+        params.push(price);
+    }
+
+    if(size){
+        sql += " AND size = ?";
+        params.push(size);
+    }
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).send("Internal server error");
+        }
+        res.render("index", { products: results }); // pass data to search.ejs
+    });
+});
+
+
 app.listen(3000, () => {
     console.log('Server started on port 3000');
 });
