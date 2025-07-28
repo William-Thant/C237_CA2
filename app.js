@@ -372,7 +372,34 @@ app.get('/searchuser', (req, res) => {
 });
 
 
+app.get('/summary', (req, res) => {
+    const summary = {};
 
+    const totalQuery = "SELECT COUNT(*) AS total FROM products";
+    db.query(totalQuery, (err, totalResult) => {
+        if (err) return res.status(500).send("Total error");
+
+        summary.total = totalResult[0].total;
+
+        const catQuery = "SELECT product_category, COUNT(*) AS count FROM products GROUP BY product_category";
+        db.query(catQuery, (err, catResults) => {
+            if (err) return res.status(500).send("Category error");
+
+            summary.categories = catResults;
+
+            const avgQuery = "SELECT AVG(price) AS avg_price FROM products";
+            db.query(avgQuery, (err, avgResult) => {
+                if (err) return res.status(500).send("Avg error");
+
+                summary.avg_price = (avgResult[0].avg_price !== null)
+                    ? Number(avgResult[0].avg_price).toFixed(2)
+                    : "0.00";
+
+                res.render('summary', { summary });
+            });
+        });
+    });
+});
 
 app.listen(3000, () => {
     console.log('Server started on port 3000');
