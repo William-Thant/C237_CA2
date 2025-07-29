@@ -306,7 +306,7 @@ app.get('/deleteproduct/:productID',(req,res)=>{
             res.status(500).send('Error deleting products')
         }
         else{
-            res.redirect('/index');
+            res.redirect('/productdashboard');
         }
     })
 })
