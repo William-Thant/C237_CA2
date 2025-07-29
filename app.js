@@ -176,7 +176,7 @@ app.post('/addproduct', (req, res)=>{
             res.status(500).send("Error adding product");
 
         } else{
-            res.redirect('/index');
+            res.redirect('/productdashboard');
         }
     })
 });
