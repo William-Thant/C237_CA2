@@ -695,6 +695,74 @@ app.get('/forget', (req, res) => {
     res.redirect('/');
 });
 
+/*
+function getNextReviewId(callback) {
+    const sql = "SELECT MAX(reviewid) AS maxId FROM reviews";
+    db.query(sql, (err, results) => {
+        if (err) return callback(err);
+        const nextId = results[0].maxId ? results[0].maxId + 1 : 200;
+        callback(null, nextId);
+    });
+}
+
+app.get('/reviews', (req, res) => {
+    const sql = "SELECT * FROM reviews";
+    db.query(sql, (err, reviews) => {
+        if (err) {
+            console.error("Error loading reviews:", err);
+            return res.status(500).send("Error loading reviews.");
+        }
+        res.render('reviews', {
+            reviews,
+            user: req.session.user,
+            messages: req.flash('info')
+        });
+    });
+});
+
+app.post('/reviews', checkAuthenticated, (req, res) => {
+    const { reviewMsg, rating } = req.body;
+
+    if (!reviewMsg || !rating || isNaN(rating) || rating < 1 || rating > 5) {
+        req.flash('info', 'Please enter a valid review and rating between 1 and 5.');
+        return res.redirect('/reviews');
+    }
+
+    getNextReviewId((err, nextId) => {
+        if (err) {
+            console.error("Error getting review ID:", err);
+            req.flash('info', 'Unable to submit review.');
+            return res.redirect('/reviews');
+        }
+
+        const sql = "INSERT INTO reviews (reviewid, reviewMsg, rating) VALUES (?, ?, ?)";
+        db.query(sql, [nextId, reviewMsg.trim(), parseInt(rating)], (err) => {
+            if (err) {
+                console.error("Error inserting review:", err);
+                req.flash('info', 'Error submitting review.');
+            } else {
+                req.flash('info', 'submitted!');
+            }
+            res.redirect('/reviews');
+        });
+    });
+});
+
+app.post('/reviews/delete/:id', checkAuthenticated, checkAdmin, (req, res) => {
+    const reviewId = req.params.id;
+    const sql = "DELETE FROM reviews WHERE reviewid = ?";
+    db.query(sql, [reviewId], (err) => {
+        if (err) {
+            console.error("Error deleting review:", err);
+            req.flash('info', 'Failed to delete.');
+        } else {
+            req.flash('info', 'Review deleted.');
+        }
+        res.redirect('/reviews');
+    });
+});
+*/
+
 app.listen(3000, () => {
     console.log('Server started on port 3000');
 });
