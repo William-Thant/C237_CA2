@@ -118,7 +118,7 @@ app.get('/register', (req, res) => {
 
 //******** TODO: Create a middleware function validateRegistration ********//
 const validateRegistration = (req,res, next) =>{
-    const { username,image,email,password,address,contact,role} =req.body;
+    const { username,email,password,image,address,contact,role} =req.body;
 
     if (!username || !image || !email || !password || !address || !contact || !role ) {
         return res.status(400).send('All fields are required.');
@@ -135,16 +135,29 @@ const validateRegistration = (req,res, next) =>{
 //******** TODO: Integrate validateRegistration into the register route. ********//
 app.post('/register', validateRegistration, (req, res) => {
     //******** TODO: Update register route to include role. ********//
-    const { username,image, email, password, address, contact ,role} = req.body;
-
-    const sql = 'INSERT INTO users (username, image, email, password, address, contact, role) VALUES (?, ?, ?, SHA1(?), ?, ?, ?)';
-    db.query(sql, [username,image, email, password, address, contact, role], (err, result) => {
+    const { username, email, password, image, address, contact ,role} = req.body;
+    const checkBanSql = 'SELECT * FROM banuser WHERE email = ?';
+    db.query(checkBanSql, [email], (err, banResults) => {
         if (err) {
-            throw err;
+            console.error("Error checking ban list:", err);
+            return res.status(500).send("Server error.");
         }
-        console.log(result);
-        req.flash('success', 'Registration successful! Please log in.');
-        res.redirect('/dashboard');
+
+        if (banResults.length > 0) {
+            // Email is banned
+            return res.status(403).send("This email has been banned and cannot be used to register.");
+        }
+
+
+        const sql = 'INSERT INTO users (username, image, email, password, address, contact, role) VALUES (?, ?, ?, SHA1(?), ?, ?, ?)';
+        db.query(sql, [username,image, email, password, address, contact, role], (err, result) => {
+            if (err) {
+                throw err;
+            }
+            console.log(result);
+            req.flash('success', 'Registration successful! Please log in.');
+            res.redirect('/index');
+        });
     });
 });
 
@@ -155,9 +168,9 @@ app.get('/addproduct', (req, res)=>{
 });
 app.post('/addproduct', (req, res)=>{
     //Extract product date from the request body
-    const {product_name, product_date, image, price, size} = req.body;
-    const sql = 'INSERT INTO products (product_name, product_date, image, price, size) VALUES (?,?,?,?,?)';
-    db.query( sql, [product_name, product_date, image, price, size],(error,result)=>{
+    const {product_name, product_date, price, size,product_category, image} = req.body;
+    const sql = 'INSERT INTO products (product_name, product_date, image, price, size, product_category) VALUES (?,?,?,?,?,?)';
+    db.query( sql, [product_name, product_date, image, price, size, product_category],(error,result)=>{
         if (error) {
             console.error("Error adding product:", error);
             res.status(500).send("Error adding product");
@@ -196,41 +209,51 @@ app.post('/login', (req, res) => {
         return res.redirect('/');
     }
 
-    const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA1(?)';
-    db.query(sql, [email, password], (err, result) => {
-        if (err) {
-            console.error("DB error:", err);
+    const banCheckSql = 'SELECT * FROM banuser WHERE email = ?';
+    db.query(banCheckSql, [email], (banErr, banResult) => {
+        if (banErr) {
+            console.error("Ban check error:", banErr);
             req.flash('error', 'An error occurred. Try again.');
             return res.redirect('/');
         }
 
-        if (result.length > 0) {
-            req.session.user = result[0];
-
-            // Set "remember me" cookie
-            if (rememberMe) {
-                const value = Buffer.from(`${email}:${password}`).toString('base64');
-                res.cookie('rememberMe', value, {
-                    maxAge: 7 * 24 * 60 * 60 * 1000,
-                    httpOnly: true,
-                    secure: false
-                });
-            } else {
-                res.clearCookie('rememberMe');
-            }
-
-            if (result[0].role === 'admin') {
-                return res.redirect('/dashboard');
-            } else {
-                return res.redirect('/index');
-            }
-
-        } else {
-            req.flash('error', 'Invalid email or password.');
-            res.redirect('/');
+        if (banResult.length > 0) {
+            req.flash('error', 'This account has been banned.');
+            return res.redirect('/');
         }
+
+        // Only proceed to login if NOT banned
+        const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA1(?)';
+        db.query(sql, [email, password], (err, result) => {
+            if (err) {
+                console.error("DB error:", err);
+                req.flash('error', 'An error occurred. Try again.');
+                return res.redirect('/');
+            }
+
+            if (result.length > 0) {
+                req.session.user = result[0];
+
+                if (rememberMe) {
+                    const value = Buffer.from(`${email}:${password}`).toString('base64');
+                    res.cookie('rememberMe', value, {
+                        maxAge: 7 * 24 * 60 * 60 * 1000,
+                        httpOnly: true,
+                        secure: false
+                    });
+                } else {
+                    res.clearCookie('rememberMe');
+                }
+
+                return res.redirect(result[0].role === 'admin' ? '/dashboard' : '/index');
+            } else {
+                req.flash('error', 'Invalid email or password.');
+                return res.redirect('/');
+            }
+        });
     });
 });
+
 //******** TODO: Insert code for dashboard route to render dashboard page for users. ********//
 app.get('/dashboard', checkAuthenticated, checkAdmin,(req, res) => {
     const sql = 'SELECT * FROM users';
@@ -307,9 +330,10 @@ app.get('/edituser/:id',(req,res)=>{
     })
 })
 
-app.post('/edituser/:id',(req,res)=>{
+app.post('/edituser/:id', (req,res)=>{
     const userID = req.params.id;
-    const {username, address, contact, password, email, image, role} = req.body;
+    const {username, address, contact, password, email, role, image} = req.body;
+    
     const sql ="UPDATE users SET username = ?,address = ?, contact = ?, password = SHA1(?), email =?, image = ? ,role =? WHERE id=?";
     db.query( sql, [username,address,contact,password,email,image,role,userID], (error,results)=>{
         if (error) {
@@ -346,19 +370,37 @@ const validateAdminRegistration = (req,res, next) =>{
 
 //******** TODO: Integrate validateRegistration into the register route. ********//
 app.post('/adminregister', validateAdminRegistration, (req, res) => {
-    //******** TODO: Update register route to include role. ********//
-    const { username,image, email, password, address, contact ,role} = req.body;
-
-    const sql = 'INSERT INTO users (username, image, email, password, address, contact, role) VALUES (?, ?, ?, SHA1(?), ?, ?, ?)';
-    db.query(sql, [username,image, email, password, address, contact, role], (err, result) => {
-        if (err) {
-            throw err;
+    const { username, email, password, address, contact, role, image } = req.body;
+    
+    const normalizedEmail = email.toLowerCase();
+    const banCheckSql = 'SELECT * FROM banuser WHERE LOWER(email) = ?';
+    db.query(banCheckSql, [normalizedEmail], (banErr, banResult) => {
+        if (banErr) {
+            console.error("Error checking ban list:", banErr);
+            req.flash('error', 'Server error. Please try again.');
+            return res.redirect('/adminregister');
         }
-        console.log(result);
-        req.flash('success', 'Registration successful! Please log in.');
-        res.redirect('/dashboard');
+
+        if (banResult.length > 0) {
+            req.flash('error', 'This email has been banned and cannot register.');
+            return res.redirect('/adminregister');
+        }
+
+        
+        const sql = 'INSERT INTO users (username, image, email, password, address, contact, role) VALUES (?, ?, ?, SHA1(?), ?, ?, ?)';
+        db.query(sql, [username, image, normalizedEmail, password, address, contact, role], (err, result) => {
+            if (err) {
+                console.error("Error inserting user:", err);
+                req.flash('error', 'Registration failed. Please try again.');
+                return res.redirect('/adminregister');
+            }
+
+            req.flash('success', 'Registration successful! Please log in.');
+            res.redirect('/dashboard');
+        });
     });
 });
+
 
 app.get('/editproduct/:productID',(req,res)=>{
     const productID =req.params.productID;
@@ -379,9 +421,10 @@ app.get('/editproduct/:productID',(req,res)=>{
     })
 })
 
-app.post('/editproduct/:id',(req,res)=>{
+app.post('/editproduct/:id', (req,res)=>{
     const productID = req.params.id;
     const {product_name, product_date, price, size, image} = req.body;
+    
     const sql ="UPDATE products SET product_name = ?,product_date = ?, price = ?, size = ? , image = ? WHERE productID = ?";
     db.query( sql, [product_name, product_date, price, size,image, productID], (error,results)=>{
         if (error) {
@@ -470,6 +513,8 @@ app.get('/searchuser', (req, res) => {
         res.render('dashboard', { users: results });
     });
 });
+
+
 app.get('/searchuserform', (req, res) => {
     res.render('searchuserform'); 
 });
@@ -513,6 +558,101 @@ app.get('/searchuserfilter', (req, res) => {
         res.render("dashboard", { users: results }); // pass data to search.ejs
     });
 });
+
+app.get('/ban_dashboard', (req, res) => {
+    const sql = "SELECT * FROM banuser";
+    db.query(sql, (error, results) => {
+        if (error) {
+            console.error("Error fetching banned users:", error);
+            res.status(500).send("Failed to load ban dashboard");
+        } else {
+            res.render("ban_dashboard", { banuser: results });
+        }
+    });
+});
+
+app.get('/banuser', (req, res)=>{
+    res.render('banuser');
+});
+app.post('/banuser',(req, res)=>{
+    //Extract product date from the request body
+    const {username,ban_reason,ban_start,ban_end,email} = req.body;
+   
+    const sql = 'INSERT INTO banuser (username,ban_reason,ban_start,ban_end,email) VALUES (?,?,?,?,?)';
+    db.query( sql, [username,ban_reason,ban_start,ban_end,email],(error,result)=>{
+        if (error) {
+            console.error("Error adding ban user:", error);
+            res.status(500).send("Error adding banuser");
+
+        } else{
+            res.redirect('/ban_dashboard');
+        }
+    })
+})
+app.get('/deleteBanuser/:banuserid',(req,res)=>{
+    const banuserid = req.params.banuserid;
+    const sql ="DELETE FROM banuser WHERE banuserid = ?";
+    db.query(sql, [banuserid],(error,results)=>{
+        if(error){
+            console.error("Error banning users", error)
+            res.status(500).send('Error banning users')
+        }
+        else{
+            res.redirect('/banuser');
+        }
+    })
+})
+
+app.get('/deleteBanuser2/:banuserid',(req,res)=>{
+    const banuserid = req.params.banuserid;
+    const sql ="DELETE FROM banuser WHERE banuserid = ?";
+    db.query(sql, [banuserid],(error,results)=>{
+        if(error){
+            console.error("Error banning users", error)
+            res.status(500).send('Error banning users')
+        }
+        else{
+            res.redirect('/ban_dashboard');
+        }
+    })
+})
+
+app.post('/editbanuser/:banuserid',(req,res)=>{
+    const banuserID = req.params.banuserid;
+    const {username, ban_reason, ban_start, ban_end,email} = req.body;
+    const sql ="UPDATE banuser SET username = ?, ban_reason = ?, ban_start = ?, ban_end = ?, email = ? WHERE banuserid=?";
+    db.query( sql, [username,ban_reason,ban_start,ban_end,email, banuserID], (error,results)=>{
+        if (error) {
+            console.error("Error updating user:", error);
+            res.status(500).send("Error updating user");
+
+        }
+        else {
+            res.redirect('/ban_dashboard')
+        }
+    })
+});
+
+app.get('/editbanuser/:banuserid',(req,res)=>{
+    const banuserID=req.params.banuserid;
+    const sql ="SELECT * FROM banuser WHERE banuserid =?";
+    db.query( sql,[banuserID],(error,results)=>{
+        if (error) {
+            console.error("Database querry error:", error.message);
+            return res.status(500).send('Error retrieving ban user by ID');
+
+        }
+        if (results.length >0){
+            res.render('editbanuser',{banuser: results[0]});
+
+        }
+        else{
+            res.status(404).send("user not found");
+        }
+    })
+})
+
+
 
 
 app.get('/summary',checkAuthenticated, checkAdmin, (req, res) => {

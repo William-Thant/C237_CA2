@@ -12,7 +12,7 @@
         }
 
         .navbar {
-            background-color: #000 !important;
+            background-color: #343a40 !important;
         }
 
         .navbar-brand,
@@ -27,87 +27,111 @@
 
         h2 {
             font-weight: bold;
-            margin: 30px 0 20px;
+            color: #343a40;
+            margin-bottom: 30px;
         }
 
-        .table-container {
+        .form-container {
             background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .table th, .table td {
-            vertical-align: middle;
-            font-size: 0.95rem;
-            padding: 12px 15px;
+        .form-label {
+            font-weight: 600;
         }
 
-        .table img {
-            width: 90px;
-            height: auto;
-            border-radius: 6px;
+        .form-control {
+            background-color: white;
+            color: black;
+        }
+
+        .btn-primary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-primary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
         }
 
         .btn {
-            margin-right: 10px;
+            width: 100%;
         }
 
-        form.d-flex {
-            margin-left: auto;
-        }
-
-        @media (max-width: 768px) {
-            .table img {
-                width: 60px;
-            }
+        .text-center h2 {
+            margin-bottom: 20px;
         }
     </style>
-        <title>Update User Details</title>
-    </head>
+    <title>Update User Details</title>
+</head>
 <body>
 
+    <nav class="navbar navbar-expand-sm navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">User App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
-        <br>
-        <div class="text-center"><h2>Update User Details</h2></div>
-        <br>
-        <div class="text-center">
-           <form action="/edituser/<%= user.id %>" method="POST" class="mt-4">
-               
-                    <label for="username">User Name:</label>
-                    <input type="text" id="username" name="username" class="form-control" required>
+        <div class="form-container">
+            <h2 class="text-center">Update User Details</h2>
+            <form action="/edituser/<%= user.id %>" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">User Name</label>
+                    <input type="text" id="username" name="username" class="form-control" required value="<%= user.username %>">
+                </div>
 
-                    <label for="email">Email:</label>
-                    <input type="text" id="email" name="email" class="form-control" required >
-                
-                
-                    <label for="password">Password:</label>
-                    <input type="text" id="password" name="password" class="form-control" required >
-                
-                
-                    <label for="address">Address:</label>
-                    <input type="text" id="address" name="address" class="form-control" required >
-                
-                
-                    <label for="contact">Contact Number:</label>
-                    <input type="text" id="contact" name="contact" class="form-control" required >
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="text" id="email" name="email" class="form-control" required value="<%= user.email %>">
+                </div>
 
-                    
-                    <label for="image">Image:</label>
-                    <input type="text" id="image" name="image" class="form-control" required >
-                
-                    <label for="role">Role</label>
-                    <select id="role" name="role">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="text" id="password" name="password" class="form-control" required value="<%= user.password %>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" id="address" name="address" class="form-control" required value="<%= user.address %>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="contact" class="form-label">Contact Number</label>
+                    <input type="text" id="contact" name="contact" class="form-control" required value="<%= user.contact %>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="image" class="form-label">Image</label>
+                    <input type="text" id="image" name="image" class="form-control" required value="<%= user.image %>">
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select id="role" name="role" class="form-control">
+                        <option value="user" <% if (user.role === 'user') { %> selected <% } %>>User</option>
+                        <option value="admin" <% if (user.role === 'admin') { %> selected <% } %>>Admin</option>
                     </select>
-                    
-                    <br><br>
-                
-            
-                <button type="submit" class="btn btn-primary">Update</button>
+                </div>
 
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary px-4">Update</button>
+                </div>
             </form>
+        </div>
     </div>
 
 </body>

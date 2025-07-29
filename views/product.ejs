@@ -1,107 +1,124 @@
-<!-- product.ejs -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toy Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background-color: #f9fafb;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        .navbar {
-            background-color: #000 !important;
-        }
+    .navbar {
+      background-color: #000 !important;
+    }
 
-        .navbar-brand,
-        .nav-link {
-            color: white !important;
-        }
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
 
-        .navbar-brand {
-            font-size: 1.6rem;
-            font-weight: bold;
-        }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
 
-        h2 {
-            font-weight: bold;
-            margin: 30px 0 20px;
-        }
+    .details-container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-        .table-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+    h2 {
+      text-align: center;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 30px;
+    }
 
-        .table th, .table td {
-            vertical-align: middle;
-            font-size: 0.95rem;
-            padding: 12px 15px;
-        }
+    .detail-label {
+      font-weight: 600;
+      color: #555;
+    }
 
-        .table img {
-            width: 90px;
-            height: auto;
-            border-radius: 6px;
-        }
+    .detail-value {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
 
-        .btn {
-            margin-right: 10px;
-        }
+    .product-img {
+      max-width: 200px;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
 
-        form.d-flex {
-            margin-left: auto;
-        }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #0d6efd;
+      text-decoration: none;
+      font-weight: 500;
+    }
 
-        @media (max-width: 768px) {
-            .table img {
-                width: 60px;
-            }
-        }
-    </style>
-    <title>User App</title>
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .product-img {
+        max-width: 140px;
+      }
+
+      .details-container {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="/index">User App</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link" href="/addproduct">Add Product</a>
-              </li> 
-            </ul>
-          </div>
-        </div>
-    </nav>
-    
-    <div class="container">
-        <br>
-        <div class="text-center"><h2>Toy Details</h2></div>
-        <br>
-        <% if (product) { %> <!-- Check if product data exists -->
-            <div>
-                <p><b>Product Name:</b><br> <%= product.product_name %></p>
-                <p><b>Product Image:</b><br> <img src = "<%= product.image %>" width="20%"></p>
-                <p><b>Product Date:</b><br> <%= new Date(product.product_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) %> </p>
-                <p><b>Product Price:</b><br> $<%= product.price.toFixed(2) %></p>
-                <p><b>Product Size:</b><br> <%= product.size %></p> 
-                
-            </div>
-        <% } else { %>
-            <p>No Product found.</p>
-        <% } %>
-        <a href ="/">Back</a>
+  <nav class="navbar navbar-expand-sm navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/index">Toy Inventory</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/addproduct">Add Product</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
+
+  <div class="details-container">
+    <h2>Toy Details</h2>
     
+    <% if (product) { %>
+      <div class="text-center">
+        <img class="product-img" src="<%= product.image %>" alt="Toy Image">
+      </div>
+      <p><span class="detail-label">Product Name:</span><br><span class="detail-value"><%= product.product_name %></span></p>
+      <p><span class="detail-label">Manufacture Date:</span><br><span class="detail-value"><%= new Date(product.product_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) %></span></p>
+      <p><span class="detail-label">Price:</span><br><span class="detail-value">$<%= product.price.toFixed(2) %></span></p>
+      <p><span class="detail-label">Size:</span><br><span class="detail-value"><%= product.size.charAt(0).toUpperCase() + product.size.slice(1) %></span></p>
+    <% } else { %>
+      <p class="text-center text-danger">No product found.</p>
+    <% } %>
+
+    <div class="text-center">
+      <a class="back-link" href="/">← Back to Home</a>
+    </div>
+  </div>
 </body>
 </html>

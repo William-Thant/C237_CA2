@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Search Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             background-color: #f4f6f9;
@@ -28,84 +29,77 @@
             margin: 30px 0 20px;
         }
 
-        .table-container {
+        .form-container {
             background-color: white;
             border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .table th, .table td {
-            vertical-align: middle;
-            font-size: 0.95rem;
-            padding: 12px 15px;
+        label {
+            font-weight: 500;
+            margin-top: 10px;
         }
 
-        .table img {
-            width: 90px;
-            height: auto;
-            border-radius: 6px;
+        .form-control,
+        select {
+            margin-bottom: 15px;
         }
 
-        .btn {
-            margin-right: 10px;
-        }
-
-        form.d-flex {
-            margin-left: auto;
-        }
-
-        @media (max-width: 768px) {
-            .table img {
-                width: 60px;
-            }
+        .btn-primary {
+            margin-top: 10px;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <body>
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/">Users</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-          <form class="d-flex" action="/searchuser" method="get">
-            <input class="form-control me-2" type="search" name="product_name" placeholder="Search product" aria-label="Search">
-            <button class="btn btn-outline-light" type="submit">Search</button>
-          </form>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Users</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <form class="d-flex ms-auto" action="/searchuser" method="get">
+                <input class="form-control me-2" type="search" name="product_name" placeholder="Search product" aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
         </div>
-      </div>
     </nav>
-    <div class="container">
-    <br>
-    <div class="container">
-        <br>
-        <div class="text-center"><h2>Search For Toy</h2></div>
-        <br>
-        <div class="text-center">
-            <form action="/searchproductfilter" method="GET" class="mt-4">
-                <label for="product_name">Toy Name:</label><br>
-                <input type="text" id="product_name" name="product_name"><br><br>
 
-                <label for="product_date">Manufacture Date:</label><br>
-                <input type="date" id="product_date" name="product_date"><br><br>
+    <div class="container mt-5">
+        <div class="text-center"><h2>Search for Toy</h2></div>
+        <div class="form-container mt-4">
+            <form action="/searchproductfilter" method="GET">
+                <div class="form-group">
+                    <label for="product_name">Toy Name:</label>
+                    <input type="text" id="product_name" name="product_name" class="form-control">
+                </div>
 
+                <div class="form-group">
+                    <label for="product_date">Manufacture Date:</label>
+                    <input type="date" id="product_date" name="product_date" class="form-control">
+                </div>
 
-                <label for="price">price:</label><br>
-                <input type="number" id="price" name="price" min="0" step="0.01"><br><br>
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" id="price" name="price" min="0" step="0.01" class="form-control">
+                </div>
 
-                <label for="size">Size</label>
-                <select id="size" name="size">
-                    <option value="">-- No matter --</option>
-                    <option value="large">Large</option>
-                    <option value="medium">Medium</option>
-                    <option value="small">Small</option>
-                </select>
-                <br><br>
+                <div class="form-group">
+                    <label for="size">Size:</label>
+                    <select id="size" name="size" class="form-select">
+                        <option value="">-- No matter --</option>
+                        <option value="large">Large</option>
+                        <option value="medium">Medium</option>
+                        <option value="small">Small</option>
+                    </select>
+                </div>
 
-                <button type="submit">Search Product</button>
-
+                <button type="submit" class="btn btn-primary">Search Product</button>
             </form>
         </div>
     </div>
+</body>
+</html>

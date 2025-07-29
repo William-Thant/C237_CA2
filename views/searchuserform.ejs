@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search User</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             background-color: #f4f6f9;
@@ -28,98 +31,77 @@
             margin: 30px 0 20px;
         }
 
-        .table-container {
+        .form-container {
             background-color: white;
             border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .table th, .table td {
-            vertical-align: middle;
-            font-size: 0.95rem;
-            padding: 12px 15px;
+        label {
+            font-weight: 500;
+            margin-top: 10px;
         }
 
-        .table img {
-            width: 90px;
-            height: auto;
-            border-radius: 6px;
+        .form-control,
+        .form-select {
+            margin-bottom: 15px;
         }
 
-        .btn {
-            margin-right: 10px;
-        }
-
-        form.d-flex {
-            margin-left: auto;
-        }
-
-        @media (max-width: 768px) {
-            .table img {
-                width: 60px;
-            }
+        .btn-primary {
+            margin-top: 10px;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <body>
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/dashboard">Users</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="collapsibleNavbar">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" href="/adminregister">Add Users</a>
-            </li>
-            <li>
-                <a class="nav-link" href="/searchproductform">Search Products</a>
-            </li>
-          </ul>
-          <form class="d-flex" action="/searchuser" method="get">
-            <input class="form-control me-2" type="search" name="product_name" placeholder="Search product" aria-label="Search">
-            <button class="btn btn-outline-light" type="submit">Search</button>
-          </form>
-        </div>
-      </div>
-    </nav>
-    <div class="container">
-    <br>
-    <div class="container">
-        <br>
-        <div class="text-center"><h2>Search For User</h2></div>
-        <br>
-        <div class="text-center">
-            <form action="/searchuserfilter" method="GET" class="mt-4">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="contact">Contact Number:</label>
-                <input type="text" id="contact" name="contact" class="form-control">
-            </div>
-            <div>
-                <label for="role">Role</label>
-                <select id="role" name="role">
-                    <option value="">-- No matter --</option>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <br><br>
-            </div>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Users</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="nav-link text-white me-3" href="/searchproductform">Search Product</a>
             
-            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+        
+    </nav>
+
+    <div class="container mt-5">
+        <div class="text-center"><h2>Search For User</h2></div>
+        <div class="form-container mt-4">
+            <form action="/searchuserfilter" method="GET">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact Number:</label>
+                    <input type="text" id="contact" name="contact" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" class="form-select">
+                        <option value="">-- No matter --</option>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Search User</button>
+            </form>
         </div>
     </div>
+</body>
+</html>
